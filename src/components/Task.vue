@@ -4,7 +4,7 @@
       class="task-isActive"
       :src="activeImage"
       alt="Active/Inactive"
-      :title="task.checked?'Active':'Inactive'"
+      :title="activeTitle"
       @click="toggleActive"
     />
     <input
@@ -18,10 +18,10 @@
     <img
       class="task-moveUp"
       :src="require('@/assets/move-up.svg')"
-      alt="Move Up"
-      v-if="task.id"
-      title="Move Up"
-      @click="moveUp"
+      alt="Move Task Up"
+      v-if="taskIndex"
+      title="Move Task Up"
+      @click="moveTaskUp"
     />
   </div>
 </template>
@@ -30,12 +30,15 @@
 import store from '@/store';
 
 export default {
-  props: ['note_id', 'task'],
+  props: ['noteIndex', 'task', 'taskIndex'],
   computed: {
     activeImage() {
       return this.task.checked
         ? require('@/assets/checkbox-active.svg')
         : require('@/assets/checkbox-inactive.svg');
+    },
+    activeTitle() {
+      return this.task.checked ? 'Active' : 'Inactive';
     }
   },
   methods: {
@@ -45,14 +48,14 @@ export default {
     },
     updateTask() {
       store.dispatch('updateTask', {
-        note_id: this.note_id,
-        task_id: this.task.id
+        noteIndex: this.noteIndex,
+        taskIndex: this.taskIndex
       });
     },
-    moveUp() {
+    moveTaskUp() {
       store.dispatch('moveTaskUp', {
-        note_id: this.note_id,
-        task_id: this.task.id
+        noteIndex: this.noteIndex,
+        taskIndex: this.taskIndex
       });
     }
   }
@@ -78,6 +81,7 @@ export default {
 .task-moveUp,
 .task-isActive {
   height: 1rem;
+  user-select: none;
 }
 .task-moveUp:hover,
 .task-isActive:hover {

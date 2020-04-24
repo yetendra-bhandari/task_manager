@@ -17,8 +17,16 @@
         @click="deleteNote"
       />
     </div>
-    <Task v-for="task in note.tasks" :key="task.id" :note_id="note.id" :task="task" />
-    <NewTask :note_id="note.id" />
+    <transition-group class="tasks" name="grow">
+      <Task
+        v-for="(task, index) in note.tasks"
+        :key="task.id"
+        :noteIndex="noteIndex"
+        :task="task"
+        :taskIndex="index"
+      />
+      <NewTask :noteIndex="noteIndex" :key="'newTask'" />
+    </transition-group>
   </div>
 </template>
 
@@ -28,7 +36,7 @@ import NewTask from '@/components/NewTask.vue';
 import store from '@/store';
 
 export default {
-  props: ['note'],
+  props: ['note', 'noteIndex'],
   components: {
     Task,
     NewTask
@@ -39,7 +47,7 @@ export default {
       store.dispatch('updateNote');
     },
     deleteNote() {
-      store.dispatch('deleteNote', { note_id: this.note.id });
+      store.dispatch('deleteNote', { noteIndex: this.noteIndex });
     }
   }
 };
@@ -70,8 +78,14 @@ export default {
 }
 .delete-note {
   height: 1rem;
+  user-select: none;
 }
 .delete-note:hover {
   cursor: pointer;
+}
+.tasks {
+  height: max-content;
+  display: grid;
+  gap: 0.75rem;
 }
 </style>

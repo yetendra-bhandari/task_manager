@@ -5,76 +5,75 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    newID: 0,
     notes: []
   },
   getters: {
     getNotes: state => {
-      return state.notes;
+      return state.notes
     },
-    getTask: state => (note_id, task_id) => {
-      return state.notes[note_id].tasks[task_id]
+    getTask: state => (noteIndex, taskIndex) => {
+      return state.notes[noteIndex].tasks[taskIndex]
     }
   },
   mutations: {
     LOAD_NOTES(state) {
-      let temp = localStorage.getItem('notes')
-      if (temp !== null) {
-        state.notes = JSON.parse(temp)
+      let newID = localStorage.getItem('newID')
+      if (newID !== null) {
+        state.newID = parseInt(newID)
+        state.notes = JSON.parse(localStorage.getItem('notes'))
       }
     },
     DELETE_TASK(state, {
-      note_id,
-      task_id
+      noteIndex,
+      taskIndex
     }) {
-      for (let i = task_id; i < state.notes[note_id].tasks.length - 1; i++) {
-        state.notes[note_id].tasks[i] = state.notes[note_id].tasks[i + 1];
-        state.notes[note_id].tasks[i].id--;
+      state.notes[noteIndex].tasks.splice(taskIndex, 1);
+      if (state.notes[noteIndex].tasks.length == 0) {
+        state.notes[noteIndex].newID = 0;
       }
-      state.notes[note_id].tasks.pop();
     },
     CREATE_NEW_TASK(state, {
-      note_id,
+      noteIndex,
       title
     }) {
       if (title.length) {
-        state.notes[note_id].tasks.push({
-          id: state.notes[note_id].tasks.length,
+        state.notes[noteIndex].tasks.push({
+          id: state.notes[noteIndex].newID,
           title: title,
           checked: false
         })
+        state.notes[noteIndex].newID++;
       }
     },
     MOVE_TASK_UP(state, {
-      note_id,
-      task_id
+      noteIndex,
+      taskIndex
     }) {
-      if (task_id) {
-        let temp = {};
-        temp.title = state.notes[note_id].tasks[task_id].title;
-        temp.checked = state.notes[note_id].tasks[task_id].checked;
-        state.notes[note_id].tasks[task_id].title = state.notes[note_id].tasks[task_id - 1].title
-        state.notes[note_id].tasks[task_id].checked = state.notes[note_id].tasks[task_id - 1].checked
-        state.notes[note_id].tasks[task_id - 1].title = temp.title;
-        state.notes[note_id].tasks[task_id - 1].checked = temp.checked;
+      if (taskIndex > 0) {
+        let temp1 = state.notes[noteIndex].tasks[taskIndex];
+        let temp2 = state.notes[noteIndex].tasks[taskIndex - 1];
+        state.notes[noteIndex].tasks.splice(taskIndex - 1, 2, temp1, temp2)
       }
     },
     CREATE_NEW_NOTE(state) {
-      let newID = state.notes.length;
       state.notes.push({
-        id: newID,
+        id: state.newID,
+        newID: 0,
         heading: '',
         tasks: []
       });
+      state.newID++;
     },
-    DELETE_NOTE(state, note_id) {
-      for (let i = note_id; i < state.notes.length - 1; i++) {
-        state.notes[i] = state.notes[i + 1];
-        state.notes[i].id--;
-      }
-      state.notes.pop();
+    DELETE_NOTE(state, noteIndex) {
+      state.notes.splice(noteIndex, 1);
     },
     UPDATE_STORAGE(state) {
+      if (state.notes.length == 0) {
+        state.newID = 0;
+      }
       localStorage.setItem('notes', JSON.stringify(state.notes));
+      localStorage.setItem('newID', state.newID);
     }
   },
   actions: {
@@ -87,13 +86,13 @@ export default new Vuex.Store({
       getters,
       commit
     }, {
-      note_id,
-      task_id
+      noteIndex,
+      taskIndex
     }) {
-      if (!getters.getTask(note_id, task_id).title.length) {
+      if (getters.getTask(noteIndex, taskIndex).title.length == 0) {
         commit('DELETE_TASK', {
-          note_id,
-          task_id
+          noteIndex,
+          taskIndex
         })
       }
       commit('UPDATE_STORAGE')
@@ -101,11 +100,11 @@ export default new Vuex.Store({
     createNewTask({
       commit
     }, {
-      note_id,
+      noteIndex,
       title
     }) {
       commit('CREATE_NEW_TASK', {
-        note_id,
+        noteIndex,
         title
       })
       commit('UPDATE_STORAGE')
@@ -113,12 +112,12 @@ export default new Vuex.Store({
     moveTaskUp({
       commit
     }, {
-      note_id,
-      task_id
+      noteIndex,
+      taskIndex
     }) {
       commit('MOVE_TASK_UP', {
-        note_id,
-        task_id
+        noteIndex,
+        taskIndex
       })
       commit('UPDATE_STORAGE')
     },
@@ -136,11 +135,10 @@ export default new Vuex.Store({
     deleteNote({
       commit
     }, {
-      note_id
+      noteIndex
     }) {
-      commit('DELETE_NOTE', note_id)
+      commit('DELETE_NOTE', noteIndex)
       commit('UPDATE_STORAGE')
     }
-  },
-  modules: {}
+  }
 })

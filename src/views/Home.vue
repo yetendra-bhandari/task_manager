@@ -1,8 +1,8 @@
 <template>
-  <div class="notes">
-    <Note v-for="note in notes" :key="note.id" :note="note" />
-    <NewNote />
-  </div>
+  <transition-group class="notes" name="grow" appear>
+    <Note v-for="(note,index) in notes" :key="note.id" :note="note" :noteIndex="index" />
+    <NewNote :key="'newNote'" />
+  </transition-group>
 </template>
 
 <script>

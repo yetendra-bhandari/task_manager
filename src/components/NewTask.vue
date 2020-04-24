@@ -15,7 +15,7 @@
 import store from '@/store';
 
 export default {
-  props: ['note_id'],
+  props: ['noteIndex'],
   data() {
     return {
       title: ''
@@ -24,7 +24,7 @@ export default {
   methods: {
     createNewTask() {
       store.dispatch('createNewTask', {
-        note_id: this.note_id,
+        noteIndex: this.noteIndex,
         title: this.title
       });
       this.title = '';

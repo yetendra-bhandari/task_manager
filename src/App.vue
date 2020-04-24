@@ -64,6 +64,17 @@ html {
   text-align: center;
   font: 1rem Raleway;
 }
+.grow-enter {
+  transform: scale(0, 0);
+}
+.grow-enter-active,
+.grow-move {
+  transition: all 0.25s ease-out;
+}
+.grow-leave-active {
+  transform: scale(0, 0);
+  transition: all 0.25s ease-out;
+}
 @media only screen and (max-width: 768px) {
   html {
     font-size: 20px;
